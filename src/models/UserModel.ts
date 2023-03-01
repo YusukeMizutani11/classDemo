@@ -21,4 +21,22 @@ async function getUserByEmail(email: string): Promise<User | null> {
   return await userRepository.findOne({ where: { email } });
 }
 
-export { addUser, getUserByEmail };
+async function getUserById(id: string): Promise<User | null> {
+  const user = await userRepository.findOne({
+    where: { userId }
+  });
+  
+  return user;
+}
+
+async function getViralUsers(): Promise<User[]>{
+  const viralUsers - await userRepository
+    .createQueryBuilder('user')
+    .where('profileViews >= :viralAmount', {viralAmount: 1000})
+    .select(['user.email', 'user.profileViews'])
+    .getMany();
+  
+  return viralUsers;
+}
+
+export { addUser, getUserByEmail, getUserById, getViralUsers };
