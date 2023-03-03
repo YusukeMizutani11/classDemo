@@ -3,6 +3,11 @@ import { User } from '../entities/User';
 
 const userRepository = AppDataSource.getRepository(User);
 
+async function allUserData(): Promise<User[]> {
+  const allUsers = await userRepository.find();
+  return allUsers;
+}
+  
 async function addUser(email: string, passwordHash: string): Promise<User> {
   // Create the new user object
   let newUser = new User();
@@ -18,12 +23,17 @@ async function addUser(email: string, passwordHash: string): Promise<User> {
 }
 
 async function getUserByEmail(email: string): Promise<User | null> {
-  return await userRepository.findOne({ where: { email } });
-}
+  return await userRepository.findOne({ where: { email }});
 
 async function getUserById(id: string): Promise<User | null> {
   const user = await userRepository.findOne({
-    where: { userId }
+    select: {
+      userId: true,
+      email: true,
+      profileViews: true,
+      verifiedEmail: true,
+    },
+    where: { userID }
   });
   
   return user;
@@ -38,5 +48,7 @@ async function getViralUsers(): Promise<User[]>{
   
   return viralUsers;
 }
+
+
 
 export { addUser, getUserByEmail, getUserById, getViralUsers };
