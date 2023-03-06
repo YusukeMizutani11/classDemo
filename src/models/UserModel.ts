@@ -49,6 +49,15 @@ async function getViralUsers(): Promise<User[]>{
   return viralUsers;
 }
 
+async function updateEmailAddress(userId: string, newEmail: string): Promise<void> {
+  const user = await getUserById(userId);
+  
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ email: newEmail })
+    .where({ userId: user.userId })
+    .execute();
+}
 
-
-export { addUser, getUserByEmail, getUserById, getViralUsers };
+export { addUser, getUserByEmail, getUserById, getViralUsers, updateEmailAddress };
