@@ -46,24 +46,4 @@ async function logIn(req: Request, res: Response): Promise<void> {
   res.sendStatus(200); // 200 OK
 }
 
-async function getAllUsers(req: Request, res: Response): Promise<void> {
-  const users = await allUserData();
-
-  res.json(users);
-}
-
-async function updateUserEmail(req: Request, res: Response): Promise<void> {
-  const { email } = req.params as NewEmailBody;
-  const { userId } = req.params as UserIdParam;
-  let user = await getUserByEmail(email);
-
-  if (!user) {
-    res.sendStatus(404);
-    return;
-  }
-  user = await updateEmailAddress(userId, email);
-
-  res.json(user);
-}
-
-export { registerUser, logIn, getAllUsers, updateUserEmail };
+export { registerUser, logIn };
