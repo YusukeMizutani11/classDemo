@@ -3,6 +3,11 @@ import { User } from '../entities/User';
 
 const userRepository = AppDataSource.getRepository(User);
 
+async function allUserData(): Promise<User[]> {
+  const allUsers = await userRepository.find();
+  return allUsers;
+}
+
 async function addUser(email: string, passwordHash: string): Promise<User> {
   // Create the new user object
   let newUser = new User();
@@ -18,7 +23,64 @@ async function addUser(email: string, passwordHash: string): Promise<User> {
 }
 
 async function getUserByEmail(email: string): Promise<User | null> {
-  return await userRepository.findOne({ where: { email } });
+  return userRepository.findOne({ where: { email } });
 }
 
-export { addUser, getUserByEmail };
+async function getUserById(userId: string): Promise<User | null> {
+  const user = await userRepository.findOne({
+    select: {
+      userId: true,
+      email: true,
+      profileViews: true,
+      verifiedEmail: true,
+    },
+    where: { userId },
+  });
+
+  return user;
+}
+
+async function getViralUsers(): Promise<User[]> {
+  const viralUsers = await userRepository
+    .createQueryBuilder('user')
+    .where('profileViews >= :viralAmount', { viralAmount: 1000 })
+    .select(['user.email', 'user.profileViews'])
+    .getMany();
+
+  return viralUsers;
+}
+
+async function getUsersByViews(minViews: number): Promise<User[]> {
+  const users = await userRepository
+    .createQueryBuilder('user')
+    .where('profileViews >= :minViews', { minViews }) // NOTES: the parameter `:minViews` must match the key name `minViews`
+    .select(['user.email', 'user.profileViews', 'user.joinedOn', 'user.userId'])
+    .getMany();
+
+  return users;
+}
+
+async function updateEmailAddress(userId: string, newEmail: string): Promise<User | null> {
+  const user = await getUserById(userId);
+
+  if (user) {
+    await userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ email: newEmail })
+      .where({ userId: user.userId })
+      .execute();
+  }
+
+  return user;
+}
+
+export {
+  allUserData,
+  addUser,
+  getUserByEmail,
+  getUserById,
+  getViralUsers,
+  getUsersByViews,
+  updateEmailAddress,
+};
