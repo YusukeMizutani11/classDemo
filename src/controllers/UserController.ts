@@ -51,11 +51,17 @@ async function updateUserEmail(req: Request, res: Response): Promise<void> {
   const { userId } = req.params as UserIdParam;
   let user = await getUserById(email);
 
-  if (!user) {
-    res.sendStatus(404);
-    return;
+  try {
+    user = await updateEmailAddress(userId, email);
+    if (user) {
+      user.email = email;
+      res.sendStatus(201);
+    }
+  } catch (err) {
+    console.error(err);
+    const databaseErrorMessage = parseDatabaseError(err);
+    res.status(500).json(databaseErrorMessage);
   }
-  user = await updateEmailAddress(userId, email);
 
   res.json(user);
 }
